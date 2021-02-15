@@ -546,7 +546,7 @@ class Population:
     
                 # Add mutating cell to their final types
                 counts[mm+1] +=np.bincount( mutations , minlength=n_allele)
-                counts[:,3] =  0
+                # counts[:,3] =  0 (# = Don't erase allele three)
                 # Substract mutating cells from that allele
                 daughter_counts[allele] -=n_mut
     

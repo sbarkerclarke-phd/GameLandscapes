@@ -11,8 +11,8 @@ p = Population(fitness_data="manual",
                landscape_path="./test_fitness_data2.csv",
                n_sims=2,
                mut_rate=0.1,
-               death_rate=0.05,
-               n_gen=100)
+               death_rate=0.2,
+               n_gen=1000)
 
 print(p.random_mutations(p.n_allele)) #
 
@@ -26,8 +26,8 @@ counts = p.run_abm_v2()
 p = Population(fitness_data="manual",
                landscape_path="./test_fitness_data2.csv",
                n_sims=2,
-               mut_rate=0.6,
-               death_rate=0.05,
-               n_gen=100)
+               mut_rate=0.1,
+               death_rate=0.3,
+               n_gen=1000)
 
 print(counts[0], counts[10], counts[20])

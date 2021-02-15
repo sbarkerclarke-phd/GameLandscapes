@@ -76,7 +76,7 @@ class Population:
         self.debug = debug
         
         self.fitness_data = fitness_data
-        
+        '''
         # Generate fitness data from IC50 and drugless growth rate data
         if fitness_data == 'generate':
             # Data paths
@@ -99,14 +99,17 @@ class Population:
             self.timestep_scale = max(self.drugless_rates)
             # determine number of alleles from data (not yet implemented)
             self.n_allele = self.drugless_rates.shape[0]
-        
+         '''
         # load fitness landscape from excel file
-        elif fitness_data == 'manual':
+        if fitness_data == 'manual':
             self.landscape_path = landscape_path
             self.landscape_data = self.load_fitness(self.landscape_path)
             
             self.timestep_scale = max(self.landscape_data)
             self.n_allele = self.landscape_data.shape[0]
+
+        else:
+            print("incorrect fitness type")
             
         # Initial number of cells (default = 100 at 0000)
         if init_counts is None:
@@ -117,6 +120,7 @@ class Population:
         
         # Dose parameters
         self.curve_type = curve_type # linear, constant, heaviside, pharm, pulsed
+        
         
         # Pharmacological paramters
         if k_abs < k_elim:
@@ -148,6 +152,7 @@ class Population:
             self.drug_regimen = u
         else:
             self.drug_regimen = drug_regimen
+        
         
         # Visualization parameters
         self.plot = plot # boolean
@@ -264,7 +269,7 @@ class Population:
     #                 conv[t] += u[t-tau]*self.pharm_eqn(tau,k_elim=k_elim,k_abs=k_abs,max_dose=max_dose)
     #     # conv = np.convolve()
     #     return conv
-
+    
     # New convolution method (much faster with numpy)
     def convolve_pharm(self,u):
                        # k_elim=0.01,
@@ -361,7 +366,7 @@ class Population:
             u = self.gen_impulses()
             curve = self.convolve_pharm(u)
         return curve, u
-
+    
 ###############################################################################
     # Run one abm simulation (ignores n_sim)
     # def run_abm(self):

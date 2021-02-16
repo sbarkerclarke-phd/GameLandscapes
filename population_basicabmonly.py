@@ -7,6 +7,9 @@ import scipy as sp
 import math
 # import warnings
 
+############## Mock up game aspect ############
+# Matrix A B C D
+
 class Population:
 ###############################################################################    
     # Initializer
@@ -47,7 +50,8 @@ class Population:
                  thresh = 5000,
                  three_undefined = False, # this is a hack because allele #3 in the pyrimethamine data is not quantified
                  x_lim = None, # plotting
-                 y_lim = None # plotting
+                 y_lim = None, # plotting
+                 game_quadrant = None # game type
                  ):
                 
         # Evolutionary parameters
@@ -108,19 +112,28 @@ class Population:
             self.timestep_scale = max(self.landscape_data)
             self.n_allele = self.landscape_data.shape[0]
 
+        elif fitness_data == 'game':
+            self.landscape_path = landscape_path
+            self.landscape_data = self.load_fitness(self.landscape_path)
+            
+            self.timestep_scale = max(self.landscape_data)
+            self.n_allele = self.landscape_data.shape[0]
+
         else:
             print("incorrect fitness type")
             
-        # Initial number of cells (default = 100 at 0000)
+        # Initial number of cells (default = 10000 at 0000)
         if init_counts is None:
             self.init_counts = np.zeros(self.n_allele)
-            self.init_counts[0] = 10**2
+            self.init_counts[0] = 10**4
         else:
             self.init_counts = init_counts
         
         # Dose parameters
         self.curve_type = curve_type # linear, constant, heaviside, pharm, pulsed
-        
+
+        # Game parameters
+        self.game_quadrant = game_quadrant
         
         # Pharmacological paramters
         if k_abs < k_elim:
@@ -455,7 +468,42 @@ class Population:
     #             counts[mm+1] = np.floor(counts[mm+1])
 
     #     return counts
-    
+    ########## GAME FUNCTIONS ###########
+    ## All games same type ##
+    def game_landscape(self, counts):
+        fit_land = self.landscape_data
+        quadrant = self.game_quadrant
+        N_geno = len(fit_land)
+        N_pairs = int(N_geno*(N_geno-1)/2)
+        #N_T = sum(counts)
+        N=0
+        game_landscapes = np.zeros([N_pairs,N_geno], dtype=float)
+        for i in range(1,len(fit_land)):
+            for j in range(i):
+                A,D = (fit_land[i], fit_land[j])
+                if (quadrant==None):
+                    A,B,C,D = (A,A,D,D)
+                elif(quadrant==1):
+                    A,B,C,D = (A,2*D,A/2,D)
+                elif(quadrant==2):
+                    A,B,C,D = (A,D/2,A/2,D)
+                elif(quadrant==3):
+                    A,B,C,D = (A,2*D,2*A,D)
+                elif(quadrant==4):
+                    A,B,C,D = (A,D/2,2*A,D)
+                #print(A,B,C,D)
+                N_T = counts[i]+counts[j]
+                if (N_T>0):
+                    game_landscapes[N,i] = A*counts[i]/N_T+ B*counts[j]/N_T
+                    game_landscapes[N,j] = C*counts[i]/N_T + D*counts[j]/N_T
+                N=N+1
+        fitness_update = np.zeros([N_geno,1])
+        #print(game_landscapes)
+        for i in range(N_geno):
+            fitness_update[i] =(sum(game_landscapes[:,i])/3)
+        return(fitness_update)
+        
+    ##################
     def run_abm_v2(self):
         
         n_allele = self.n_allele
@@ -502,19 +550,37 @@ class Population:
                             
             elif self.fitness_data == 'manual':
                 fit_land = self.landscape_data
-                    
+                #print(fit_land)
+
+            elif self.fitness_data == 'game':
+                fit_land = self.game_landscape(counts[mm])
+                fit_land = [float(item[0]) for item in fit_land]
+                fit_land = np.asarray(fit_land)
+                if np.isnan(fit_land).any():
+                    fit_land = self.landscape_data
+                #print(fit_land)
+
+            #print(self.game_landscape(counts[mm]))
+
+                
             fit_land = fit_land*self.div_scale
     
             # Scale division rates based on carrying capacity
             if self.carrying_cap:
                 division_scale = 1 / (1+(2*np.sum(counts[mm])/self.max_cells)**4)
+               # print(division_scale)
+                fit_land = fit_land*float(division_scale)
+
             else:
                 division_scale = 1
+                fit_land = fit_land*division_scale
+
     
             if counts[mm].sum()>self.max_cells:
                 division_scale = 0
+                fit_land = fit_land*division_scale
+
             
-            fit_land = fit_land*division_scale
             
             # fit_land = fit_land/self.timestep_scale # ensures fitness is never greater than 1
             # death_rate = self.death_rate/self.timestep_scale # scales all other rates proportionally
@@ -530,9 +596,8 @@ class Population:
             counts[mm+1] = counts[mm+1]-np.random.binomial(counts[mm],death_rate)
     
             # Divide cells
-            
+            self.timestep_scale = max(fit_land)
             divide = np.random.binomial((counts[mm+1]*self.timestep_scale).astype(int),fit_land/self.timestep_scale)
-            
             # Mutate cells
             
             daughter_types = np.repeat( np.arange(n_allele) , divide )

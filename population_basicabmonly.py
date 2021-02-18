@@ -14,7 +14,7 @@ class Population:
 ###############################################################################    
     # Initializer
     def __init__(self,
-                 carrying_cap = True,
+                 carrying_cap = False,
                  curve_type='constant', # drug concentration curve
                  counts_log_scale = False, # plot counts on log scale
                  constant_pop = False, # normalize to a constant population size
@@ -36,7 +36,7 @@ class Population:
                  landscape_path = None, # path for custom fitness landscape
                  min_dose = 0,
                  mut_rate = 0.01, # mutation rate
-                 max_cells = 10**6, # carrying capacity
+                 max_cells = 10**7, # carrying capacity
                  max_dose = 1, 
                  n_gen=1000, # number of generations
                  n_impulse = 2, # for modeling dosage regimens
@@ -71,7 +71,7 @@ class Population:
                                             
         # Model parameters
         
-        self.carrying_cap = True
+        self.carrying_cap = False
         self.thresh = thresh # Threshold for hybrid model (not yet implemented)
         self.div_scale = div_scale # Scale the division rate to simulate different organisms
         self.n_sims = n_sims # number of simulations to average together in self.simulate
@@ -125,7 +125,7 @@ class Population:
         # Initial number of cells (default = 10000 at 0000)
         if init_counts is None:
             self.init_counts = np.zeros(self.n_allele)
-            self.init_counts[0] = 10**4
+            self.init_counts[0] = 10**2
         else:
             self.init_counts = init_counts
         
@@ -573,7 +573,7 @@ class Population:
 
             else:
                 division_scale = 1
-                fit_land = fit_land*division_scale
+                fit_land = fit_land
 
     
             if counts[mm].sum()>self.max_cells:
@@ -592,12 +592,19 @@ class Population:
             counts[mm+1] = counts[mm]
     
             # Kill cells
-            
-            counts[mm+1] = counts[mm+1]-np.random.binomial(counts[mm],death_rate)
+            if (max(fit_land)!=0):
+                counts[mm+1] = counts[mm+1]-np.random.binomial(counts[mm],death_rate)
+            else:
+                counts[mm+1]=counts[mm+1]
     
             # Divide cells
-            self.timestep_scale = max(fit_land)
-            divide = np.random.binomial((counts[mm+1]*self.timestep_scale).astype(int),fit_land/self.timestep_scale)
+
+            if (max(fit_land)==0):
+                self.timestep_scale=1
+                divide = 0
+            else:
+                self.timestep_scale=max(fit_land)
+                divide = np.random.binomial((counts[mm+1]*self.timestep_scale).astype(int),fit_land/self.timestep_scale)
             # Mutate cells
             
             daughter_types = np.repeat( np.arange(n_allele) , divide )

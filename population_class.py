@@ -11,7 +11,7 @@ class Population:
 ###############################################################################    
     # Initializer
     def __init__(self,
-                 carrying_cap = True,
+                 carrying_cap = False,
                  curve_type='constant', # drug concentration curve
                  counts_log_scale = False, # plot counts on log scale
                  constant_pop = False, # normalize to a constant population size
@@ -60,7 +60,7 @@ class Population:
         self.mut_rate = mut_rate
         self.death_rate = death_rate
         
-        # Timecouse (set after running self.simulate)
+        # Timecourse (set after running self.simulate)
         self.counts = np.zeros([self.n_gen,16])
         self.counts_extinct = np.zeros([self.n_gen,16])
         self.counts_survive = np.zeros([self.n_gen,16])

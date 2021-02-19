@@ -6,17 +6,17 @@ import seaborn as sns
 import scipy as sp
 import math
 from population_basicabmonly import Population
-from pymuller import muller
+#from pymuller import muller
 
 
 
 p = Population(fitness_data="manual",
                landscape_path="./test_fitness_data2.csv",
                n_sims=2,
-               mut_rate=0.01,
-               death_rate=0.05,
-               init_counts=[0,0,200,0],
-               n_gen=300)
+               mut_rate=0.1,
+               death_rate=0.1,
+               init_counts=[100,0,0,0],
+               n_gen=3000)
 
 print(p.random_mutations(p.n_allele)) #
 
@@ -30,10 +30,10 @@ print("NoGame")
 p = Population(fitness_data="manual",
                landscape_path="./test_fitness_data2.csv",
                n_sims=2,
-               mut_rate=0.01,
-               death_rate=0.05,
-               init_counts=[200,200,200,0],
-               n_gen=300)
+               mut_rate=0.1,
+               death_rate=0.1,
+               init_counts=[100,0,0,0],
+               n_gen=3000)
 
 print(p.random_mutations(p.n_allele)) #
 counts, n_survive = p.simulate()
@@ -44,10 +44,10 @@ print("Game1")
 p = Population(fitness_data="game",
                landscape_path="./test_fitness_data2.csv",
                n_sims=2,
-               mut_rate=0.01,
-               death_rate=0.05,
-               init_counts=[200,200,200,0],
-               n_gen=300,
+               mut_rate=0.1,
+               death_rate=0.1,
+               init_counts=[100,0,0,0],
+               n_gen=3000,
                game_quadrant=1)
 
 print(p.random_mutations(p.n_allele)) #
@@ -60,10 +60,10 @@ print("Game2")
 p = Population(fitness_data="game",
                landscape_path="./test_fitness_data2.csv",
                n_sims=2,
-               mut_rate=0.01,
-               death_rate=0.05,
-               init_counts=[200,200,200,0],
-               n_gen=300,
+               mut_rate=0.1,
+               death_rate=0.1,
+               init_counts=[100,0,0,0],
+               n_gen=3000,
                game_quadrant=2)
 
 print(p.random_mutations(p.n_allele)) #
@@ -75,10 +75,10 @@ print("Game3")
 p = Population(fitness_data="game",
                landscape_path="./test_fitness_data2.csv",
                n_sims=2,
-               mut_rate=0.01,
-               death_rate=0.05,
-               init_counts=[200,200,200,0],
-               n_gen=300,
+               mut_rate=0.1,
+               death_rate=0.1,
+               init_counts=[100,0,0,0],
+               n_gen=3000,
                game_quadrant=3)
 
 print(p.random_mutations(p.n_allele)) #
@@ -90,10 +90,10 @@ print("Game4")
 p = Population(fitness_data="game",
                landscape_path="./test_fitness_data2.csv",
                n_sims=2,
-               mut_rate=0.01,
-               death_rate=0.05,
-               init_counts=[200,200,200,0],
-               n_gen=300,
+               mut_rate=0.1,
+               death_rate=0.1,
+               init_counts=[100,0,0,0],
+               n_gen=3000,
                game_quadrant=4)
 
 print(p.random_mutations(p.n_allele)) #

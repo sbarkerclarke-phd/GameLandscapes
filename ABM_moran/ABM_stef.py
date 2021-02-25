@@ -1,5 +1,5 @@
 from landscape_evolution import *
-from wFish_func import *
+from wFish_func_fullmatrix import *
 import matplotlib.pyplot as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,10 +20,10 @@ def main_func():
     #Define things that remain same throughout simulation
 
     pop_size = 10000         # Size of Population
-    seq_length = 4       # This is "N"
-    generations = 200      # How long it runs
-    mutation_rate = 0.0001     # per gen per individual per site
-    repeats = 3            # Number of landscape replicates
+    seq_length = 3       # This is "N"
+    generations = 10      # How long it runs
+    mutation_rate = 0.001     # per gen per individual per site
+    repeats = 1            # Number of landscape replicates
 
     
     # Possible mutations at any site.
@@ -34,9 +34,10 @@ def main_func():
 
     #Landscape
     A = Landscape(seq_length, 2)
-    print(A)
+    #A = {'00':0.3, '01':0.7 '10':-0.3, '11':2.4}
+    
     A.ls = ((A.ls-np.min(A.ls))/(np.max(A.ls)-np.min(A.ls))) + 1e-5   # Normalize to fitness 0 --> 1 for fitness proportionality
-
+    print(A)
     #genotypes = [''.join(seq) for seq in itertools.product("01", repeat=seq_length)]
     
     history_store = {}
@@ -56,7 +57,7 @@ def main_func():
     #sum_list_f = [a/repeats for a in sum_list]
     #print(sum_list_f)
 
-    history = history_store[0]
+    history=simulate_game(pop, None, generations, mutation_rate, pop_size, seq_length, A, alphabet)
     history_game1=simulate_game(pop, 1, generations, mutation_rate, pop_size, seq_length, A, alphabet)
     history_game2=simulate_game(pop, 2, generations, mutation_rate, pop_size, seq_length, A, alphabet)
     history_game3=simulate_game(pop, 3, generations, mutation_rate, pop_size, seq_length, A, alphabet)
@@ -74,7 +75,7 @@ def main_func():
     #Generate plot object
     fig = mpl.figure(num=None, figsize=(14, 14), dpi=80, facecolor='w', edgecolor='k')
     h = 5 
-    w = 2
+    w = 3
     #No game
     mpl.subplot2grid((h,w), (0,0))
     stacked_trajectory_plot(history, generations, pop_size)

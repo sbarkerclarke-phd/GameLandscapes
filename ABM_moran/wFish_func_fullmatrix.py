@@ -25,7 +25,7 @@ def simulate_game(pop, game, generations, mutation_rate, pop_size, seq_length, A
     fitness = {}
     #fitnessB = {}
     #base_haplotype = ''.join(["0" for i in range(seq_length)])
-    base_haplotype = '01'+'0'*(seq_length-2)
+    base_haplotype = '00'+'0'*(seq_length-2)
     genotypes = [''.join(seq) for seq in itertools.product("01", repeat=seq_length)]
 
     pop[base_haplotype] = pop_size
@@ -35,83 +35,101 @@ def simulate_game(pop, game, generations, mutation_rate, pop_size, seq_length, A
     for i in range(len(genotypes)):
         fitness[genotypes[i]] = A.ls[i]
         #fitnessB[genotypes[i]] = Bs[46].ls[i]
-        
+    
     #Generate random landscape
     #print(fitness)
     history = []
-    simulate(pop, game, history, generations, mutation_rate, pop_size, seq_length, fitness, alphabet)
+    simulate(pop, game, history, generations, mutation_rate, pop_size, seq_length, fitness, alphabet, genotypes)
     print(fitness)
     return(history)
     
 
-def modify_fitness(pop, fitness, game):
-
-        #Define game type
-        quadrant = game
-
-        N_geno = len(fitness.keys())
-        N_pairs = int(N_geno*(N_geno-1)/2)
-        #N_T = sum(counts)
-        N=0
-        game_landscapes = {}
-
-        res = list(itertools.combinations(fitness, 2))
-        #print(res)
-
-        for i in fitness.keys():
-            game_landscapes[i]={}
-            if pop.get(i)==None:
-                pop[i]=0
-        
-        #print(res)
-        
-        for x,y in res:
-            A,D = (fitness[x], fitness[y])
-            if (quadrant==None):
-                A,B,C,D = (0,0,0,0)
-            elif(quadrant==1):
-                A,B,C,D = (A,2*D,A/2,D)
-            elif(quadrant==2):
-                A,B,C,D = (A,D/2,A/2,D)
-            elif(quadrant==3):
-                A,B,C,D = (A,2*D,2*A,D)
-            elif(quadrant==4):
-                A,B,C,D = (A,D/2,2*A,D)
-
-            #print(A,B,C,D)
-            
-            N_T = pop[x]+pop[y]
-            if (N_T>0):
-                game_landscapes[x][y] = A*pop[x]/N_T+ B*pop[y]/N_T
-                game_landscapes[y][x] = C*pop[x]/N_T + D*pop[y]/N_T
-                N=N+1
-            else:
-                game_landscapes[x][y]= game_landscapes[y][x]=0
-                
-        #print(game_landscapes['01'])
-
-        fitness_update = {}
-        
-        for i in fitness.keys():
-            fitness_update[i]= sum(game_landscapes[i].values())/ (sum(fitness.values())*2)
-
-        if (quadrant==None):
-            fitness_update = fitness
-                
-        return(fitness_update)
+def get_payoff(fitness0, game, genotypes):
     
 
-def simulate(pop, game, history ,generations, mutation_rate, pop_size, seq_length, fitness, alphabet):
+    #Define game type
+    quadrant = game
+        
+    #Number of genotypes and therefore pairwise interactions
+    N_geno = len(fitness0.keys())
+    N_pairs = int(N_geno*(N_geno-1)/2)
+        
+    #Create blank payoff matrix 
+    if game==None:
+        payoff_matrix = np.zeros((N_geno, N_geno))
+
+    else:
+        payoff_matrix = np.random.rand(N_geno, N_geno)
+    
+    fit_norm=[]
+    for i in genotypes:
+        fit_norm.append(fitness0[i])
+    
+    #j=0
+    for i in range(N_geno):
+        payoff_matrix[i][i]=fit_norm[i]
+       
+    #pop_size = sum(pop.values())
+
+    #for i in fitness.keys():
+    #    game_landscapes[i]={}
+    #    if pop.get(i)==None:
+    #        pop[i]=0
+        
+        
+    #for x,y in range(N_geno):
+    #    if (quadrant==None):
+    #        A,B,C,D = (A,D,A,D)
+    #    elif(quadrant==1):
+    #        A,B,C,D = (A,2*D,A/2,D)
+    #    elif(quadrant==2):
+    #        A,B,C,D = (A,2*D,2*A,D)
+    #    elif(quadrant==3):
+    #        A,B,C,D = (A,D/2,A/2,D)
+    #    elif(quadrant==4):
+    #        A,B,C,D = (A,D/2,2*A,D)
+    #print(payoff_matrix)
+    return(payoff_matrix)
+           
+                
+def fitness_update(genotypes, payoff_matrix, pop):
+        # pop = 
+        pop_vec=[]
+        for i in genotypes:
+            if i in pop:
+                pop_vec.append(pop[i])
+            else:
+                pop_vec.append(0)
+        print(pop_vec)
+        
+        pop_norm = [i/sum(pop.values()) for i in pop_vec]
+        
+        fitness_dic = {}
+        
+        #Multiply payoff matrix by normalised population vector
+        fitness_vec = np.dot(payoff_matrix, pop_norm)
+        
+        j=0
+        for i in genotypes:
+            fitness_dic[i] = fitness_vec[j]
+            j=j+1
+            
+        return(fitness_dic)
+    
+
+def simulate(pop, game, history ,generations, mutation_rate, pop_size, seq_length, fitness, alphabet, genotypes):
     clone_pop = dict(pop) #Population distribution
     history.append(clone_pop) #Append old pop to history
+    fitness0 = dict(fitness)
+    payoff_matrix = get_payoff(fitness0, game, genotypes)
+    
     for i in range(generations):
-        fitness = modify_fitness(pop,fitness, game)
-        #print(pop)
+        fitness = fitness_update(genotypes, payoff_matrix, pop) 
         print(fitness)
         time_step(pop, mutation_rate, pop_size, seq_length, fitness, alphabet)
         clone_pop = dict(pop)
         history.append(clone_pop)
-    print(pop)
+    #print(pop)
 
 def simulateSwitch(pop, history ,generations, mutation_rate, pop_size, seq_length, fitnessA, fitnessB, alphabet):
     clone_pop = dict(pop)

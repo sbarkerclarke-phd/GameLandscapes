@@ -473,6 +473,7 @@ class Population:
     def game_landscape(self, counts):
         fit_land = self.landscape_data
         quadrant = self.game_quadrant
+        dF = 0.1 #Strength of game interaction
         N_geno = len(fit_land)
         N_pairs = int(N_geno*(N_geno-1)/2)
         #N_T = sum(counts)
@@ -484,13 +485,13 @@ class Population:
                 if (quadrant==None):
                     A,B,C,D = (A,A,D,D)
                 elif(quadrant==1):
-                    A,B,C,D = (A,2*D,A/2,D)
+                    A,B,C,D = (A,D+dF,A-dF,D)
                 elif(quadrant==2):
-                    A,B,C,D = (A,D/2,A/2,D)
+                    A,B,C,D = (A,D-dF,A-dF,D)
                 elif(quadrant==3):
-                    A,B,C,D = (A,2*D,2*A,D)
+                    A,B,C,D = (A,D+dF,A+dF,D)
                 elif(quadrant==4):
-                    A,B,C,D = (A,D/2,2*A,D)
+                    A,B,C,D = (A,D-dF,A+dF,D)
                 #print(A,B,C,D)
                 N_T = counts[i]+counts[j]
                 if (N_T>0):
@@ -592,8 +593,12 @@ class Population:
             counts[mm+1] = counts[mm]
     
             # Kill cells
+        
+            #Death/division rate
+            dead = np.random.binomial(counts[mm],death_rate)
+            
             if (max(fit_land)!=0):
-                counts[mm+1] = counts[mm+1]-np.random.binomial(counts[mm],death_rate)
+                counts[mm+1] = counts[mm+1]-dead
             else:
                 counts[mm+1]=counts[mm+1]
     
@@ -603,8 +608,13 @@ class Population:
                 self.timestep_scale=1
                 divide = 0
             else:
+                lst=[]
                 self.timestep_scale=max(fit_land)
-                divide = np.random.binomial((counts[mm+1]*self.timestep_scale).astype(int),fit_land/self.timestep_scale)
+                for i in fit_land:
+                    lst.append(i/sum(fit_land))
+                divide = np.random.binomial(100,lst)
+                #divide = dead*fit_land/sum(fit_land)
+                #divide = np.random.binomial((counts[mm+1]*self.timestep_scale).astype(int),fit_land/self.timestep_scale)
             # Mutate cells
             
             daughter_types = np.repeat( np.arange(n_allele) , divide )

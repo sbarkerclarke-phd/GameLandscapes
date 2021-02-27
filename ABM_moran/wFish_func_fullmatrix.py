@@ -20,10 +20,9 @@ Simulate Wright-Fisher evolution for some amount of generations
 def initialise():
     return(0)
 
-def simulate_game(pop, game, generations, mutation_rate, pop_size, seq_length, A, alphabet):
+def simulate_game(pop, game, generations, mutation_rate, pop_size, seq_length, A, alphabet, returnGame=False):
     pop = {}
     fitness = {}
-    #fitnessB = {}
     #base_haplotype = ''.join(["0" for i in range(seq_length)])
     base_haplotype = '00'+'0'*(seq_length-2)
     genotypes = [''.join(seq) for seq in itertools.product("01", repeat=seq_length)]
@@ -36,12 +35,15 @@ def simulate_game(pop, game, generations, mutation_rate, pop_size, seq_length, A
         fitness[genotypes[i]] = A.ls[i]
         #fitnessB[genotypes[i]] = Bs[46].ls[i]
     
-    #Generate random landscape
-    #print(fitness)
+    payoff_matrix = get_payoff(fitness, game, genotypes)
+    game_coords = get_game_coords(payoff_matrix, genotypes, fitness)
+    
     history = []
-    simulate(pop, game, history, generations, mutation_rate, pop_size, seq_length, fitness, alphabet, genotypes)
-    print(fitness)
-    return(history)
+    history = simulate(pop, game, history, generations, mutation_rate, pop_size, seq_length, fitness, alphabet, genotypes, payoff_matrix)
+    if returnGame==True:
+        return(game_coords, history)
+    else:
+        return(history)
     
 
 def get_payoff(fitness0, game, genotypes):
@@ -90,9 +92,26 @@ def get_payoff(fitness0, game, genotypes):
     #        A,B,C,D = (A,D/2,2*A,D)
     #print(payoff_matrix)
     return(payoff_matrix)
-           
+
+def get_game_coords(payoff_matrix, genotypes, fitness0):
+    game_coords={}
+    for i in range(len(genotypes)-1,1, -1):
+        g_i = genotypes[i]
+        for j in range(i):
+            g_j = genotypes[j]
+            game_coords[g_i+g_j]=[fitness0[str(g_i)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_j)]]
+    return(game_coords)
+
+def get_game_points(game_matrix):
+    game_points = {}
+    for game in game_matrix:
+        matrix = game_matrix[game]
+        x = matrix[2]-matrix[0]
+        y = matrix[3]-matrix[1]
+        game_points[game]=[x,y]
+    return(game_points)
                 
-def fitness_update(genotypes, payoff_matrix, pop):
+def fitness_update(genotypes, fitness0, payoff_matrix, pop, game):
         # pop = 
         pop_vec=[]
         for i in genotypes:
@@ -100,36 +119,39 @@ def fitness_update(genotypes, payoff_matrix, pop):
                 pop_vec.append(pop[i])
             else:
                 pop_vec.append(0)
-        print(pop_vec)
+        #print(pop_vec)
         
         pop_norm = [i/sum(pop.values()) for i in pop_vec]
         
         fitness_dic = {}
         
-        #Multiply payoff matrix by normalised population vector
-        fitness_vec = np.dot(payoff_matrix, pop_norm)
         
-        j=0
-        for i in genotypes:
-            fitness_dic[i] = fitness_vec[j]
-            j=j+1
+        #GAME: Multiply payoff matrix by normalised population vector
+        if game==None:
+
+            fitness_dic = fitness0
+        
+        else:
+            fitness_vec = np.dot(payoff_matrix, pop_norm)
+            j=0
+            for i in genotypes:
+                fitness_dic[i] = fitness_vec[j]
+                j=j+1
             
         return(fitness_dic)
     
 
-def simulate(pop, game, history ,generations, mutation_rate, pop_size, seq_length, fitness, alphabet, genotypes):
+def simulate(pop, game, history ,generations, mutation_rate, pop_size, seq_length, fitness, alphabet, genotypes, payoff_matrix):
     clone_pop = dict(pop) #Population distribution
     history.append(clone_pop) #Append old pop to history
     fitness0 = dict(fitness)
-    payoff_matrix = get_payoff(fitness0, game, genotypes)
     
     for i in range(generations):
-        fitness = fitness_update(genotypes, payoff_matrix, pop) 
-        print(fitness)
+        fitness = fitness_update(genotypes, fitness0, payoff_matrix, pop, game) 
         time_step(pop, mutation_rate, pop_size, seq_length, fitness, alphabet)
         clone_pop = dict(pop)
         history.append(clone_pop)
-    #print(pop)
+    return(history)
 
 def simulateSwitch(pop, history ,generations, mutation_rate, pop_size, seq_length, fitnessA, fitnessB, alphabet):
     clone_pop = dict(pop)
@@ -343,6 +365,7 @@ def stacked_trajectory_plot(history, generations, pop_size, xlabel="generation")
     plt.stackplot(range(generations), trajectories, colors=colors_lighter)
     plt.ylim(0, 1)
     plt.ylabel("frequency")
+    plt.legend(haplotypes, prop={'size': 10})
     plt.xlabel(xlabel)
 
 def get_snp_frequency(site, generation, history, pop_size):

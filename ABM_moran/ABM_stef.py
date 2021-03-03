@@ -19,8 +19,8 @@ except ImportError:
 def main_func():
     #Define things that remain same throughout simulation
 
-    pop_size = 1000         # Size of Population
-    seq_length = 1       # This is "N"
+    pop_size = 10000         # Size of Population
+    seq_length = 2       # This is "N"
     generations = 200      # How long it runs
     mutation_rate = 0.01     # per gen per individual per site
     repeats = 1            # Number of landscape replicates
@@ -36,8 +36,9 @@ def main_func():
 
 
     #Landscape (random or determined)
-    A = Landscape(seq_length, 2)# ls=np.array([0,0.25,0.25,0.5]))
-    A.ls = ((A.ls-np.min(A.ls))/(np.max(A.ls)-np.min(A.ls))) + 0.5   # Normalize to fitness 0 --> 1 for fitness proportionality
+    A = Landscape(seq_length, 2, ls=np.array([0.5,0.5,0.5,0.5]))
+    # A.ls = ((A.ls-np.min(A.ls))/(np.max(A.ls)-np.min(A.ls))) + 0.5   
+    # Normalize to fitness 0 --> 1 for fitness proportionality
     
     #Fitness vector
     fitness0 = {}
@@ -96,6 +97,8 @@ def main_func():
     fig = mpl.figure(num=None, figsize=(14, 14), dpi=80, facecolor='w', edgecolor='k')
     h = 5 
     w = 3
+    Pxl = -1
+    Pxh = 1
     #No game
     mpl.subplot2grid((h,w), (0,0))
     stacked_trajectory_plot(history, generations, pop_size)
@@ -136,8 +139,8 @@ def main_func():
     plt.rcParams['font.size'] = '10'
     
     plt.subplot2grid((h,w),(1,2))
-    plt.xlim(-3,3)
-    plt.ylim(-3,3)
+    plt.xlim(Pxl,Pxh)
+    plt.ylim(Pxl,Pxh)
     plt.grid()
 
     for key in game1pts:
@@ -158,8 +161,8 @@ def main_func():
     plt.rcParams['font.size'] = '10'
     
     plt.subplot2grid((h,w),(2,2))
-    plt.xlim(-3,3)
-    plt.ylim(-3,3)
+    plt.xlim(Pxl,Pxh)
+    plt.ylim(Pxl,Pxh)
     plt.grid()
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
@@ -177,8 +180,8 @@ def main_func():
     plt.rcParams['font.size'] = '10'
 
     plt.subplot2grid((h,w),(3,2))
-    plt.xlim(-3,3)
-    plt.ylim(-3,3)
+    plt.xlim(Pxl,Pxh)
+    plt.ylim(Pxl,Pxh)
     plt.grid()
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
@@ -196,8 +199,8 @@ def main_func():
     plt.rcParams['font.size'] = '10'
     
     plt.subplot2grid((h,w),(4,2))
-    plt.xlim(-3,3)
-    plt.ylim(-3,3)
+    plt.xlim(Pxl,Pxh)
+    plt.ylim(Pxl,Pxh)
     plt.grid()
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')

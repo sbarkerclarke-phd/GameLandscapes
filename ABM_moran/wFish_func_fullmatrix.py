@@ -65,7 +65,7 @@ def get_payoff(fitness0, game, genotypes):
         payoff_matrix = np.zeros((N_geno, N_geno))
 
     else:
-        payoff_matrix = (np.random.rand(N_geno, N_geno))*3
+        payoff_matrix = (np.random.rand(N_geno, N_geno))
     
     fit_norm=[]
     for i in genotypes:
@@ -95,16 +95,16 @@ def get_payoff(fitness0, game, genotypes):
     #    elif(quadrant==4):
     #        A,B,C,D = (A,D/2,2*A,D)
     #print(payoff_matrix)
+
+    print(np.linalg.eig(payoff_matrix))
     return(payoff_matrix)
 
 def get_game_coords(payoff_matrix, genotypes, fitness0):
     game_coords={}
     if len(genotypes)>2:
-        for i in range(len(genotypes)-1,1, -1):
-            print(i)
+        for i in range(len(genotypes)-1,0, -1):
             g_i = genotypes[i]
             for j in range(i):
-                print(j)
                 g_j = genotypes[j]
                 game_coords[g_i+g_j]=[fitness0[str(g_i)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_j)]]
     else:

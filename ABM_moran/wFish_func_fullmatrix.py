@@ -24,7 +24,7 @@ def simulate_game(pop, game, generations, mutation_rate, pop_size, seq_length, A
     pop = {}
     fitness = {}
     #base_haplotype = ''.join(["0" for i in range(seq_length)])
-    base_haplotype = '00'+'0'*(seq_length-2)
+    base_haplotype = '0'+'0'*(seq_length-1)
     genotypes = [''.join(seq) for seq in itertools.product("01", repeat=seq_length)]
 
     pop[base_haplotype] = pop_size
@@ -36,8 +36,9 @@ def simulate_game(pop, game, generations, mutation_rate, pop_size, seq_length, A
         #fitnessB[genotypes[i]] = Bs[46].ls[i]
     
     payoff_matrix = get_payoff(fitness, game, genotypes)
+    #print(payoff_matrix)
     game_coords = get_game_coords(payoff_matrix, genotypes, fitness)
-    
+    print(game_coords)
     history = []
     history = simulate(pop, game, history, generations, mutation_rate, pop_size, seq_length, fitness, alphabet, genotypes, payoff_matrix)
     if returnGame==True:
@@ -54,14 +55,17 @@ def get_payoff(fitness0, game, genotypes):
         
     #Number of genotypes and therefore pairwise interactions
     N_geno = len(fitness0.keys())
-    N_pairs = int(N_geno*(N_geno-1)/2)
+    if N_geno>2:
+        N_pairs = int(N_geno*(N_geno-1)/2)
+    else:
+        N_pairs = 1
         
     #Create blank payoff matrix 
     if game==None:
         payoff_matrix = np.zeros((N_geno, N_geno))
 
     else:
-        payoff_matrix = np.random.rand(N_geno, N_geno)
+        payoff_matrix = (np.random.rand(N_geno, N_geno))*3
     
     fit_norm=[]
     for i in genotypes:
@@ -95,11 +99,21 @@ def get_payoff(fitness0, game, genotypes):
 
 def get_game_coords(payoff_matrix, genotypes, fitness0):
     game_coords={}
-    for i in range(len(genotypes)-1,1, -1):
+    if len(genotypes)>2:
+        for i in range(len(genotypes)-1,1, -1):
+            print(i)
+            g_i = genotypes[i]
+            for j in range(i):
+                print(j)
+                g_j = genotypes[j]
+                game_coords[g_i+g_j]=[fitness0[str(g_i)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_j)]]
+    else:
+        i = 1
+        j = 0
         g_i = genotypes[i]
-        for j in range(i):
-            g_j = genotypes[j]
-            game_coords[g_i+g_j]=[fitness0[str(g_i)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_j)]]
+        g_j = genotypes[j]
+        game_coords[g_i+g_j]= [fitness0[str(g_i)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_j)]]
+
     return(game_coords)
 
 def get_game_points(game_matrix):
@@ -107,7 +121,7 @@ def get_game_points(game_matrix):
     for game in game_matrix:
         matrix = game_matrix[game]
         x = matrix[2]-matrix[0]
-        y = matrix[3]-matrix[1]
+        y = matrix[1]-matrix[3]
         game_points[game]=[x,y]
     return(game_points)
                 
@@ -128,16 +142,17 @@ def fitness_update(genotypes, fitness0, payoff_matrix, pop, game):
         
         #GAME: Multiply payoff matrix by normalised population vector
         if game==None:
-
             fitness_dic = fitness0
         
         else:
             fitness_vec = np.dot(payoff_matrix, pop_norm)
+            #fitness_vec = [(fitness_vec[i]-np.min(fitness_vec))/(np.max(fitness_vec)-np.min(fitness_vec)) for i in range(len(fitness_vec))]
             j=0
             for i in genotypes:
                 fitness_dic[i] = fitness_vec[j]
                 j=j+1
-            
+
+        
         return(fitness_dic)
     
 

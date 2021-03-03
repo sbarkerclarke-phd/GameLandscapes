@@ -20,7 +20,7 @@ def main_func():
     #Define things that remain same throughout simulation
 
     pop_size = 1000         # Size of Population
-    seq_length = 2       # This is "N"
+    seq_length = 1       # This is "N"
     generations = 200      # How long it runs
     mutation_rate = 0.01     # per gen per individual per site
     repeats = 1            # Number of landscape replicates
@@ -36,8 +36,8 @@ def main_func():
 
 
     #Landscape (random or determined)
-    A = Landscape(seq_length, 2, ls=np.array([0,0.25,0.25,0.5]))
-    A.ls = ((A.ls-np.min(A.ls))/(np.max(A.ls)-np.min(A.ls))) + 1e-5   # Normalize to fitness 0 --> 1 for fitness proportionality
+    A = Landscape(seq_length, 2)# ls=np.array([0,0.25,0.25,0.5]))
+    A.ls = ((A.ls-np.min(A.ls))/(np.max(A.ls)-np.min(A.ls))) + 0.5   # Normalize to fitness 0 --> 1 for fitness proportionality
     
     #Fitness vector
     fitness0 = {}
@@ -75,14 +75,16 @@ def main_func():
     history=simulate_game(pop, None, generations, mutation_rate, pop_size, seq_length, A, alphabet)
     game1, history_game1=simulate_game(pop, 1, generations, mutation_rate, pop_size, seq_length, A, alphabet, True)
     game1pts = get_game_points(game1)
-    print(game1)
+    print(game1pts)
     game2, history_game2=simulate_game(pop, 2, generations, mutation_rate, pop_size, seq_length, A, alphabet, True)
     game2pts = get_game_points(game2)
+    print(game2pts)
     game3, history_game3=simulate_game(pop, 3, generations, mutation_rate, pop_size, seq_length, A, alphabet, True)
     game3pts = get_game_points(game3)
+    print(game3pts)
     game4, history_game4=simulate_game(pop, 4, generations, mutation_rate, pop_size, seq_length, A, alphabet, True)
     game4pts = get_game_points(game4)
-    
+    print(game4pts)
     #history_game3=simulate_game(pop, 3, generations, mutation_rate, pop_size, seq_length, A, alphabet)
     #history_game4=simulate_game(pop, 4, generations, mutation_rate, pop_size, seq_length, A, alphabet)
 
@@ -104,23 +106,24 @@ def main_func():
     plt.rcParams['font.size'] = '10'
     
     #Fitness plot
-    plt.subplot2grid((h,w),(0,2))
-    plt.ylabel("Fitness")
-    plt.rcParams['font.size'] = '10'
-    #plt.xlim(0,1)
+    if seq_length > 1:
+        plt.subplot2grid((h,w),(0,2))
+        plt.ylabel("Fitness")
+        plt.rcParams['font.size'] = '10'
+        #plt.xlim(0,1)
     
-    xcoords = [0.2,0.5,0.5,0.8]
-    ycoords = [0.5, 0.75, 0.25, 0.5]
-    plt.xlim(-0.2,1.2)
-    plt.ylim(-0.2,1.2)
-    f = [i for i in fitness0.values()]
-    size = [(i+0.1)*1000 for i in fitness0.values()]
+        xcoords = [0.2,0.5,0.5,0.8]
+        ycoords = [0.5, 0.75, 0.25, 0.5]
+        plt.xlim(-0.2,1.2)
+        plt.ylim(-0.2,1.2)
+        f = [i for i in fitness0.values()]
+        size = [(i+0.1)*1000 for i in fitness0.values()]
      
-    scatter = plt.scatter(xcoords, ycoords, c=size, s=size,  cmap="Blues", edgecolors="black")
-    handles=scatter.legend_elements()[0]
-    labels = ['00', "01,10",'11']
-    plt.legend(handles,labels)
-    plt.axis('off')        
+        scatter = plt.scatter(xcoords, ycoords, c=size, s=size,  cmap="Blues", edgecolors="black")
+        handles=scatter.legend_elements()[0]
+        labels = ['00', "01,10",'11']
+        plt.legend(handles,labels)
+        plt.axis('off')        
 
     #Quadrant 1
     plt.subplot2grid((h,w), (1,0))
@@ -133,8 +136,8 @@ def main_func():
     plt.rcParams['font.size'] = '10'
     
     plt.subplot2grid((h,w),(1,2))
-    plt.xlim(-1,1)
-    plt.ylim(-1,1)
+    plt.xlim(-3,3)
+    plt.ylim(-3,3)
     plt.grid()
 
     for key in game1pts:
@@ -155,8 +158,8 @@ def main_func():
     plt.rcParams['font.size'] = '10'
     
     plt.subplot2grid((h,w),(2,2))
-    plt.xlim(-1,1)
-    plt.ylim(-1,1)
+    plt.xlim(-3,3)
+    plt.ylim(-3,3)
     plt.grid()
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
@@ -174,8 +177,8 @@ def main_func():
     plt.rcParams['font.size'] = '10'
 
     plt.subplot2grid((h,w),(3,2))
-    plt.xlim(-1,1)
-    plt.ylim(-1,1)
+    plt.xlim(-3,3)
+    plt.ylim(-3,3)
     plt.grid()
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
@@ -193,8 +196,8 @@ def main_func():
     plt.rcParams['font.size'] = '10'
     
     plt.subplot2grid((h,w),(4,2))
-    plt.xlim(-1,1)
-    plt.ylim(-1,1)
+    plt.xlim(-3,3)
+    plt.ylim(-3,3)
     plt.grid()
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')

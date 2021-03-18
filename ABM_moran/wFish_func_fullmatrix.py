@@ -60,12 +60,8 @@ def get_payoff(fitness0, game, genotypes):
     else:
         N_pairs = 1
         
-    #Create blank payoff matrix 
-    if game==None:
-        payoff_matrix = np.zeros((N_geno, N_geno))
-
-    else:
-        payoff_matrix = (np.random.rand(N_geno, N_geno))
+    #Create random payoff matrix 
+    payoff_matrix = (np.random.rand(N_geno, N_geno))
     
     fit_norm=[]
     for i in genotypes:
@@ -74,7 +70,11 @@ def get_payoff(fitness0, game, genotypes):
     #j=0
     for i in range(N_geno):
         payoff_matrix[i][i]=fit_norm[i]
-       
+
+    if game==None:
+        for i in range(N_geno):
+            for j in range(N_geno):
+                payoff_matrix[i][j]=fit_norm[i]
     #pop_size = sum(pop.values())
 
     #for i in fitness.keys():
@@ -106,13 +106,13 @@ def get_game_coords(payoff_matrix, genotypes, fitness0):
             g_i = genotypes[i]
             for j in range(i):
                 g_j = genotypes[j]
-                game_coords[g_i+g_j]=[fitness0[str(g_i)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_j)]]
+                game_coords[g_i+"-"+g_j]=[fitness0[str(g_j)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_i)]]
     else:
         i = 1
         j = 0
         g_i = genotypes[i]
         g_j = genotypes[j]
-        game_coords[g_i+g_j]= [fitness0[str(g_i)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_j)]]
+        game_coords[g_i+"-"+g_j]= [fitness0[str(g_j)],payoff_matrix[i][j], payoff_matrix[j][i], fitness0[str(g_i)]]
 
     return(game_coords)
 
@@ -121,7 +121,7 @@ def get_game_points(game_matrix):
     for game in game_matrix:
         matrix = game_matrix[game]
         x = matrix[2]-matrix[0]
-        y = matrix[1]-matrix[3]
+        y = matrix[3]-matrix[1]
         game_points[game]=[x,y]
     return(game_points)
                 
@@ -141,7 +141,7 @@ def fitness_update(genotypes, fitness0, payoff_matrix, pop, game):
         
         
         #GAME: Multiply payoff matrix by normalised population vector
-        if game==None:
+        if game=="orig":
             fitness_dic = fitness0
         
         else:

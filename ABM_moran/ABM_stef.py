@@ -20,7 +20,7 @@ def main_func():
     #Define things that remain same throughout simulation
 
     pop_size = 10000         # Size of Population
-    seq_length = 2       # This is "N"
+    seq_length =2      # This is "N"
     generations = 200      # How long it runs
     mutation_rate = 0.01     # per gen per individual per site
     repeats = 1            # Number of landscape replicates
@@ -36,8 +36,12 @@ def main_func():
 
 
     #Landscape (random or determined)
-    A = Landscape(seq_length, 2, ls=np.array([0.5,0.5,0.5,0.5]))
-    # A.ls = ((A.ls-np.min(A.ls))/(np.max(A.ls)-np.min(A.ls))) + 0.5   
+    #Flat landscape
+    A = Landscape(seq_length, 2, ls=np.array([0.5]*len(genotypes))) #,0.5,0.5]))
+    
+    #random
+    #A = Landscape(seq_length, 2)
+    #A.ls = ((A.ls-np.min(A.ls))/(np.max(A.ls)-np.min(A.ls))) + 0.5   
     # Normalize to fitness 0 --> 1 for fitness proportionality
     
     #Fitness vector
@@ -109,7 +113,7 @@ def main_func():
     plt.rcParams['font.size'] = '10'
     
     #Fitness plot
-    if seq_length > 1:
+    if seq_length ==2:
         plt.subplot2grid((h,w),(0,2))
         plt.ylabel("Fitness")
         plt.rcParams['font.size'] = '10'

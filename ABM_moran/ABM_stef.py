@@ -20,8 +20,8 @@ def main_func():
     #Define things that remain same throughout simulation
 
     pop_size = 10000         # Size of Population
-    seq_length =2      # This is "N"
-    generations = 200      # How long it runs
+    seq_length =1      # This is "N"
+    generations = 400      # How long it runs
     mutation_rate = 0.01     # per gen per individual per site
     repeats = 1            # Number of landscape replicates
 
@@ -80,16 +80,16 @@ def main_func():
     history=simulate_game(pop, None, generations, mutation_rate, pop_size, seq_length, A, alphabet)
     game1, history_game1=simulate_game(pop, 1, generations, mutation_rate, pop_size, seq_length, A, alphabet, True)
     game1pts = get_game_points(game1)
-    print(game1pts)
+    #print(game1pts)
     game2, history_game2=simulate_game(pop, 2, generations, mutation_rate, pop_size, seq_length, A, alphabet, True)
     game2pts = get_game_points(game2)
-    print(game2pts)
+    #print(game2pts)
     game3, history_game3=simulate_game(pop, 3, generations, mutation_rate, pop_size, seq_length, A, alphabet, True)
     game3pts = get_game_points(game3)
-    print(game3pts)
+    #print(game3pts)
     game4, history_game4=simulate_game(pop, 4, generations, mutation_rate, pop_size, seq_length, A, alphabet, True)
     game4pts = get_game_points(game4)
-    print(game4pts)
+    #print(game4pts)
     #history_game3=simulate_game(pop, 3, generations, mutation_rate, pop_size, seq_length, A, alphabet)
     #history_game4=simulate_game(pop, 4, generations, mutation_rate, pop_size, seq_length, A, alphabet)
 
